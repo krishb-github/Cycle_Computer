@@ -42,7 +42,11 @@
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define ROTARY_MASK (3U<<1U)
+#define SP_RISE_MASK (3U<<1U)
+#define SP_FALL_MASK  (0U<<1U)
+#define SM_RISE_MASK (2U<<1U)
+#define SM_FALL_MASK  (1U<<1U)
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -55,6 +59,9 @@ void SVC_Handler(void);
 void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
+void EXTI1_IRQHandler(void);
+void EXTI2_IRQHandler(void);
+void EXTI3_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
