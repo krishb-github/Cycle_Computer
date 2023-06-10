@@ -100,11 +100,11 @@ int main(void)
 
   /// lets print some string
 
-	SSD1306_GotoXY (0,0);
-	SSD1306_Puts ("AKIRA KRISH", &Font_11x18, 1);
-	SSD1306_GotoXY (10, 30);
-	SSD1306_Puts ("RATHE", &Font_11x18, 1);
-	SSD1306_UpdateScreen(); //display
+  SSD1306_GotoXY (0,0);
+  SSD1306_Puts ("AKIRA KRISH", &Font_11x18, 1);
+  SSD1306_GotoXY (10, 30);
+  SSD1306_Puts ("RATHE", &Font_11x18, 1);
+  SSD1306_UpdateScreen(); //display
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -112,10 +112,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-	  HAL_Delay(1000);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -210,7 +207,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 9600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -252,10 +249,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : s__Pin s_A2_Pin sw_Pin sqw_int_Pin
-                           rtc_clk_Pin reed_Pin */
-  GPIO_InitStruct.Pin = s__Pin|s_A2_Pin|sw_Pin|sqw_int_Pin
-                          |rtc_clk_Pin|reed_Pin;
+  /*Configure GPIO pins : sp_Pin sm_Pin sw_Pin */
+  GPIO_InitStruct.Pin = sp_Pin|sm_Pin|sw_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
