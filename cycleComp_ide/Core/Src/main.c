@@ -126,6 +126,7 @@ int main(void)
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
 		  HAL_Delay(1000);
 	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -264,7 +265,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : sp_Pin sm_Pin */
   GPIO_InitStruct.Pin = sp_Pin|sm_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
