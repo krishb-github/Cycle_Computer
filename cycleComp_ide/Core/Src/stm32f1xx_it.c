@@ -213,7 +213,17 @@ void EXTI1_IRQHandler(void)
   /* USER CODE BEGIN EXTI1_IRQn 1 */
   testVar = 2;
 
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout < 0))
+  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+  {
+	  timeout--;
+	  tempRd = GPIOA->IDR;
+  }
+
+  for(timeout = 0xFFFF;timeout>0;timeout--);
+  timeout = 0xFFFF;
+  tempRd = GPIOA->IDR;
+
+  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
   {
 	  timeout--;
 	  tempRd = GPIOA->IDR;
@@ -239,12 +249,21 @@ void EXTI2_IRQHandler(void)
   /* USER CODE BEGIN EXTI2_IRQn 1 */
   testVar = 1;
 
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout < 0))
+  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
   {
 	  timeout--;
 	  tempRd = GPIOA->IDR;
   }
 
+  for(timeout = 0xFFFF;timeout>0;timeout--);
+  timeout = 0xFFFF;
+  tempRd = GPIOA->IDR;
+
+  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+  {
+	  timeout--;
+	  tempRd = GPIOA->IDR;
+  }
 
 	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
 	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
