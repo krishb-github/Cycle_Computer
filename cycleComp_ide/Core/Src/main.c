@@ -63,8 +63,13 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-ROT_INPUT rotInput;
+ROT_INPUT rotInput=0;
+ROT_SWITCH rotSw = NOT_PUSHED;
 uint8_t choiceValid=0;
+dispTable *currentScr;
+
+extern dispTable homeScr;
+
 /* USER CODE END 0 */
 
 /**
@@ -102,10 +107,13 @@ int main(void)
   SSD1306_Init();  // initialise
 
   /// lets print some string
+  currentScr = &homeScr;
 
   SSD1306_GotoXY (0,0);
   SSD1306_Puts ("ODO : 1234567", &Font_11x18, 1);
   SSD1306_GotoXY (0, 17);
+  SSD1306_Puts ("TRIP : 1234", &Font_11x18, 1);
+  SSD1306_GotoXY (0, 34);
   SSD1306_Puts ("SPD : xx kmph", &Font_11x18, 1);
   SSD1306_UpdateScreen(); //display
   /* USER CODE END 2 */
@@ -115,28 +123,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  /*if(testVar == 1)
-	  {
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	  HAL_Delay(100);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-	  HAL_Delay(100);
-	  }
-	  else if(testVar == 2)
-	  {
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-		  HAL_Delay(1000);
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-		  HAL_Delay(1000);
-	  }*/
-
-	  //for(uint32_t test=0x1fffff; test>0;--test);
-	  if(choiceValid)
-	  {
-		  choiceValid = 0;
-		  displayRefresh(rotInput);
-	  }
-
+	  uiNavigation(&choiceValid, rotInput, &rotSw);
+	  //rotInput = NA;
+	  //rotSw = NOT_PUSHED;
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

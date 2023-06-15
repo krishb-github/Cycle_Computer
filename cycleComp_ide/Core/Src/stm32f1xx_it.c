@@ -58,6 +58,7 @@
 
 /* USER CODE BEGIN EV */
 extern ROT_INPUT rotInput;
+extern ROT_SWITCH rotSw;
 extern uint8_t choiceValid;
 /* USER CODE END EV */
 
@@ -206,7 +207,7 @@ void EXTI1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI1_IRQn 0 */
 	uint16_t tempRd;
-	uint32_t timeout = 0x10D400;
+	uint32_t timeout = 0xaffff; //0x10D400;
 	tempRd = GPIOA->IDR;
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sp_Pin);
@@ -220,9 +221,9 @@ void EXTI1_IRQHandler(void)
 	  tempRd = GPIOA->IDR;
   }
 
-  for(timeout = 0x10D400;timeout>0;timeout--);
+  for(timeout = 0xaffff;timeout>0;timeout--);
 
-  timeout = 0x10D400;
+  timeout = 0xaffff;
   tempRd = GPIOA->IDR;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
@@ -243,7 +244,7 @@ void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
 	uint16_t tempRd;
-	uint32_t timeout=0x10D400;
+	uint32_t timeout=0xaffff;
 	tempRd = GPIOA->IDR;
   /* USER CODE END EXTI2_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sm_Pin);
@@ -257,8 +258,8 @@ void EXTI2_IRQHandler(void)
 	  tempRd = GPIOA->IDR;
   }
 
-  for(timeout = 0x10D400;timeout>0;timeout--);
-  timeout = 0x10D400;
+  for(timeout = 0xaffff;timeout>0;timeout--);
+  timeout = 0xaffff;
   tempRd = GPIOA->IDR;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
@@ -278,7 +279,8 @@ void EXTI2_IRQHandler(void)
 void EXTI3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI3_IRQn 0 */
-
+	rotSw = PUSHED;
+	choiceValid = 1;
   /* USER CODE END EXTI3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sw_Pin);
   /* USER CODE BEGIN EXTI3_IRQn 1 */
