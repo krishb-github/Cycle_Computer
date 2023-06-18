@@ -55,7 +55,6 @@ typedef struct
 	int maxChoice;
 	char *choiceName[10];
 	void *nextChoice[10];
-	void (*func_ptr[10])(void);
 }dispTable;
 
 /* USER CODE END ET */

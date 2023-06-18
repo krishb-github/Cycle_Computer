@@ -65,7 +65,7 @@ static void MX_USART1_UART_Init(void);
 
 ROT_INPUT rotInput=0;
 ROT_SWITCH rotSw = NOT_PUSHED;
-uint8_t choiceValid=0;
+volatile uint8_t choiceValid=0;
 dispTable *currentScr;
 
 extern dispTable homeScr;

@@ -1,2 +1,2 @@
-../Core/Src/dispMap.c:57:6:displayRefresh	16	static
-../Core/Src/dispMap.c:105:6:uiNavigation	24	static
+../Core/Src/dispMap.c:57:6:displayRefresh	24	static
+../Core/Src/dispMap.c:121:6:uiNavigation	24	static

@@ -9,6 +9,7 @@
 #include "ssd1306.h"
 #include "test.h"
 #include "dispMap.h"
+#include <stdio.h>
 
 extern dispTable *currentScr;
 dispTable gpsInfo;
@@ -47,7 +48,6 @@ dispTable homeScr =
 	.maxChoice = 3,
 	.choiceName = {"GPS_INFO", "CYCLE_INFO", "BACK"},
 	.nextChoice = {&gpsInfo, &cycInfo, &showSpeed},
-	.func_ptr[0] = displayRefresh,
 };
 
 
@@ -67,6 +67,22 @@ void displayRefresh(ROT_INPUT rotInput, dispTable *currentScr)
 		  SSD1306_UpdateScreen(); //display
 
 		  return;
+	}
+
+	if(currentScr == &serviceInt)
+	{
+		int intvl = 500;
+		char *tmp;
+		sprintf(tmp, "%d",intvl);
+		//while(get_int_status())
+		{
+			  SSD1306_GotoXY (0,0);
+			  SSD1306_Puts ("INTVL : ", &Font_11x18, 1);
+			  SSD1306_Puts (tmp, &Font_11x18, 1);
+
+			  SSD1306_UpdateScreen(); //display
+			  return;
+		}
 	}
 
 	if(rotInput == INCR)
@@ -104,7 +120,7 @@ void displayRefresh(ROT_INPUT rotInput, dispTable *currentScr)
 
 void uiNavigation(uint8_t *choiceValid, ROT_INPUT rotInput, ROT_SWITCH *rotSw)
 {
-	  if(currentScr == &showSpeed)
+	  if((currentScr == &showSpeed) | (currentScr == &serviceInt))
 	  {
 		  currentScr = &homeScr;
 	  }
@@ -116,7 +132,7 @@ void uiNavigation(uint8_t *choiceValid, ROT_INPUT rotInput, ROT_SWITCH *rotSw)
 		  *rotSw = NOT_PUSHED;
 		  displayRefresh(rotInput, currentScr);
 	  }
-	  else if(*choiceValid && (rotInput != NA))
+	  else if((*choiceValid) && (rotInput != NA))
 	  {
 		  displayRefresh(rotInput, currentScr);
 	  }
