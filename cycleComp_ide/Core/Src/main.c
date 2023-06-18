@@ -24,6 +24,7 @@
 #include "fonts.h"
 #include "ssd1306.h"
 #include "test.h"
+#include "dispMap.h"
 
 /* USER CODE END Includes */
 
@@ -61,7 +62,14 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile uint8_t testVar = 0;
+
+ROT_INPUT rotInput=0;
+ROT_SWITCH rotSw = NOT_PUSHED;
+volatile uint8_t choiceValid=0;
+dispTable *currentScr;
+
+extern dispTable homeScr;
+
 /* USER CODE END 0 */
 
 /**
@@ -99,11 +107,14 @@ int main(void)
   SSD1306_Init();  // initialise
 
   /// lets print some string
+  currentScr = &homeScr;
 
   SSD1306_GotoXY (0,0);
-  SSD1306_Puts ("AKIRA KRISH", &Font_11x18, 1);
-  SSD1306_GotoXY (10, 30);
-  SSD1306_Puts ("RATHE", &Font_11x18, 1);
+  SSD1306_Puts ("ODO : 1234567", &Font_11x18, 1);
+  SSD1306_GotoXY (0, 17);
+  SSD1306_Puts ("TRIP : 1234", &Font_11x18, 1);
+  SSD1306_GotoXY (0, 34);
+  SSD1306_Puts ("SPD : xx kmph", &Font_11x18, 1);
   SSD1306_UpdateScreen(); //display
   /* USER CODE END 2 */
 
@@ -112,21 +123,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  if(testVar == 1)
-	  {
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	  HAL_Delay(100);
-	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-	  HAL_Delay(100);
-	  }
-	  else if(testVar == 2)
-	  {
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-		  HAL_Delay(1000);
-		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-		  HAL_Delay(1000);
-	  }
-
+	  uiNavigation(&choiceValid, rotInput, &rotSw);
+	  //rotInput = NA;
+	  //rotSw = NOT_PUSHED;
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

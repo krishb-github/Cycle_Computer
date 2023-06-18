@@ -57,7 +57,9 @@
 /* External variables --------------------------------------------------------*/
 
 /* USER CODE BEGIN EV */
-extern volatile uint8_t testVar;
+extern ROT_INPUT rotInput;
+extern ROT_SWITCH rotSw;
+extern volatile uint8_t choiceValid;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -204,13 +206,16 @@ void SysTick_Handler(void)
 void EXTI1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI1_IRQn 0 */
+	HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
 	uint16_t tempRd;
-	uint32_t timeout = 0x30D400;
+	uint32_t timeout = 0x10D400; //0x10D400;
 	tempRd = GPIOA->IDR;
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sp_Pin);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
-  testVar = 2;
+  rotInput = INCR;
+  choiceValid = 1;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
   {
@@ -218,9 +223,9 @@ void EXTI1_IRQHandler(void)
 	  tempRd = GPIOA->IDR;
   }
 
-  for(timeout = 0x30D400;timeout>0;timeout--);
+  for(timeout = 0x10D400;timeout>0;timeout--);
 
-  timeout = 0x30D400;
+  timeout = 0x10D400;
   tempRd = GPIOA->IDR;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
@@ -240,13 +245,16 @@ void EXTI1_IRQHandler(void)
 void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
+	HAL_NVIC_DisableIRQ(EXTI1_IRQn);
+	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
 	uint16_t tempRd;
-	uint32_t timeout=0x30D400;
+	uint32_t timeout=0x10D400;
 	tempRd = GPIOA->IDR;
   /* USER CODE END EXTI2_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sm_Pin);
   /* USER CODE BEGIN EXTI2_IRQn 1 */
-  testVar = 1;
+  rotInput = DECR;
+  choiceValid = 1;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
   {
@@ -254,8 +262,8 @@ void EXTI2_IRQHandler(void)
 	  tempRd = GPIOA->IDR;
   }
 
-  for(timeout = 0x30D400;timeout>0;timeout--);
-  timeout = 0x30D400;
+  for(timeout = 0x10D400;timeout>0;timeout--);
+  timeout = 0x10D400;
   tempRd = GPIOA->IDR;
 
   while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
@@ -275,7 +283,8 @@ void EXTI2_IRQHandler(void)
 void EXTI3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI3_IRQn 0 */
-
+	rotSw = PUSHED;
+	choiceValid = 1;
   /* USER CODE END EXTI3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(sw_Pin);
   /* USER CODE BEGIN EXTI3_IRQn 1 */

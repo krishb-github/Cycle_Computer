@@ -36,6 +36,26 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef enum
+{
+	DECR = -1,
+	INCR = 1,
+	NA = 0,
+}ROT_INPUT;
+
+typedef enum
+{
+	NOT_PUSHED = 0,
+	PUSHED = 1,
+}ROT_SWITCH;
+
+typedef struct
+{
+	int currentChoice;
+	int maxChoice;
+	char *choiceName[10];
+	void *nextChoice[10];
+}dispTable;
 
 /* USER CODE END ET */
 
