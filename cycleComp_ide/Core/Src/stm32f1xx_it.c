@@ -55,11 +55,13 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
-extern ROT_INPUT rotInput;
-extern ROT_SWITCH rotSw;
-extern volatile uint8_t choiceValid;
+extern uint8_t rxFlag;
+extern uint8_t updateFlag;
+extern uint8_t rxIntCheck, seqCheck;
+extern char rxData;
+extern char gpsBuff[];
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -201,95 +203,66 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles EXTI line1 interrupt.
+  * @brief This function handles USART1 global interrupt.
   */
-void EXTI1_IRQHandler(void)
+void USART1_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI1_IRQn 0 */
-	HAL_NVIC_DisableIRQ(EXTI1_IRQn);
-	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-	uint16_t tempRd;
-	uint32_t timeout = 0x10D400; //0x10D400;
-	tempRd = GPIOA->IDR;
-  /* USER CODE END EXTI1_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(sp_Pin);
-  /* USER CODE BEGIN EXTI1_IRQn 1 */
-  rotInput = INCR;
-  choiceValid = 1;
+  /* USER CODE BEGIN USART1_IRQn 0 */
 
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+  if((seqCheck == 0) && (rxData == '$'))
   {
-	  timeout--;
-	  tempRd = GPIOA->IDR;
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 1;
+	  rxIntCheck = 1;
   }
-
-  for(timeout = 0x10D400;timeout>0;timeout--);
-
-  timeout = 0x10D400;
-  tempRd = GPIOA->IDR;
-
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+   else if((seqCheck == 1) && (rxData == 'G'))
   {
-	  timeout--;
-	  tempRd = GPIOA->IDR;
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 2;
+	  rxIntCheck = 1;
   }
-
-	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-  /* USER CODE END EXTI1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles EXTI line2 interrupt.
-  */
-void EXTI2_IRQHandler(void)
-{
-  /* USER CODE BEGIN EXTI2_IRQn 0 */
-	HAL_NVIC_DisableIRQ(EXTI1_IRQn);
-	HAL_NVIC_DisableIRQ(EXTI2_IRQn);
-	uint16_t tempRd;
-	uint32_t timeout=0x10D400;
-	tempRd = GPIOA->IDR;
-  /* USER CODE END EXTI2_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(sm_Pin);
-  /* USER CODE BEGIN EXTI2_IRQn 1 */
-  rotInput = DECR;
-  choiceValid = 1;
-
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+  else if((seqCheck == 2) && (rxData == 'P'))
   {
-	  timeout--;
-	  tempRd = GPIOA->IDR;
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 3;
+	  rxIntCheck = 1;
   }
-
-  for(timeout = 0x10D400;timeout>0;timeout--);
-  timeout = 0x10D400;
-  tempRd = GPIOA->IDR;
-
-  while(!((tempRd & ROTARY_MASK) == ROTARY_MASK) && (timeout > 0))
+  else if((seqCheck == 3) && (rxData == 'R'))
   {
-	  timeout--;
-	  tempRd = GPIOA->IDR;
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 4;
+	  rxIntCheck = 1;
   }
+  else if((seqCheck == 4) && (rxData == 'M'))
+  {
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 5;
+	  rxIntCheck = 1;
+  }
+  else if((seqCheck == 5) && (rxData == 'C'))
+  {
+	  gpsBuff[seqCheck] = rxData;
+	  seqCheck = 6;
+	  rxIntCheck = 1;
+  }
+  else if(seqCheck != 6)
+  {
+	  seqCheck = 0;
+	  rxIntCheck = 1;
+  }
+  else if(seqCheck == 6)
+  {
+	  --rxIntCheck;
+  }
+  //else if((seqCheck == 6) && ((char)(*(--huart1.pRxBuffPtr)) == '\n'))
+  //{
+	  //rxIntCheck = 1;
+  //}
 
-	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-  /* USER CODE END EXTI2_IRQn 1 */
-}
-
-/**
-  * @brief This function handles EXTI line3 interrupt.
-  */
-void EXTI3_IRQHandler(void)
-{
-  /* USER CODE BEGIN EXTI3_IRQn 0 */
-	rotSw = PUSHED;
-	choiceValid = 1;
-  /* USER CODE END EXTI3_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(sw_Pin);
-  /* USER CODE BEGIN EXTI3_IRQn 1 */
-
-  /* USER CODE END EXTI3_IRQn 1 */
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

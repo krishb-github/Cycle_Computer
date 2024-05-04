@@ -28,7 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-
+#include "stm32f1xx_hal_uart.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -36,26 +36,7 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-typedef enum
-{
-	DECR = -1,
-	INCR = 1,
-	NA = 0,
-}ROT_INPUT;
-
-typedef enum
-{
-	NOT_PUSHED = 0,
-	PUSHED = 1,
-}ROT_SWITCH;
-
-typedef struct
-{
-	int currentChoice;
-	int maxChoice;
-	char *choiceName[10];
-	void *nextChoice[10];
-}dispTable;
+#define GPS_BUFF_SIZE 350U
 
 /* USER CODE END ET */
 
@@ -77,15 +58,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define sp_Pin GPIO_PIN_1
-#define sp_GPIO_Port GPIOA
-#define sp_EXTI_IRQn EXTI1_IRQn
-#define sm_Pin GPIO_PIN_2
-#define sm_GPIO_Port GPIOA
-#define sm_EXTI_IRQn EXTI2_IRQn
-#define sw_Pin GPIO_PIN_3
-#define sw_GPIO_Port GPIOA
-#define sw_EXTI_IRQn EXTI3_IRQn
 
 /* USER CODE BEGIN Private defines */
 

@@ -24,7 +24,9 @@
 #include "fonts.h"
 #include "ssd1306.h"
 #include "test.h"
-#include "dispMap.h"
+//#include "dispMap.h"
+#include "nmea_parse.h"
+
 
 /* USER CODE END Includes */
 
@@ -63,13 +65,14 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-ROT_INPUT rotInput=0;
-ROT_SWITCH rotSw = NOT_PUSHED;
-volatile uint8_t choiceValid=0;
-dispTable *currentScr;
 
-extern dispTable homeScr;
+char gpsBuff[GPS_BUFF_SIZE];
+GPS gpsData;
 
+uint8_t rxFlag = 0, updateFlag = 0, seqCheck = 0;
+uint8_t rxIntCheck=1;
+uint8_t rxInProgress=0;
+char rxData;
 /* USER CODE END 0 */
 
 /**
@@ -107,25 +110,82 @@ int main(void)
   SSD1306_Init();  // initialise
 
   /// lets print some string
-  currentScr = &homeScr;
 
   SSD1306_GotoXY (0,0);
-  SSD1306_Puts ("ODO : 1234567", &Font_11x18, 1);
+  SSD1306_Puts ("SPD : ", &Font_11x18, 1);
   SSD1306_GotoXY (0, 17);
-  SSD1306_Puts ("TRIP : 1234", &Font_11x18, 1);
-  SSD1306_GotoXY (0, 34);
-  SSD1306_Puts ("SPD : xx kmph", &Font_11x18, 1);
+  SSD1306_Puts ("LAT: ", &Font_7x10, 1);
+  SSD1306_GotoXY (0, 27);
+  SSD1306_Puts ("LONG: ", &Font_7x10, 1);
+  SSD1306_GotoXY (0, 37);
+  SSD1306_Puts ("SAT : ", &Font_7x10, 1);
   SSD1306_UpdateScreen(); //display
   /* USER CODE END 2 */
+
+  nmea_mem_init(&gpsData);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-	  uiNavigation(&choiceValid, rotInput, &rotSw);
-	  //rotInput = NA;
-	  //rotSw = NOT_PUSHED;
+	  if(updateFlag != 0)
+	  {
+		  updateFlag = 0;
+		  SSD1306_GotoXY (60,0);
+		  SSD1306_Puts (gpsData.speed, &Font_11x18, 1);
+		  SSD1306_GotoXY (34,17);
+		  SSD1306_Puts (gpsData.lat, &Font_7x10, 1);
+		  SSD1306_GotoXY (115,17);
+		  SSD1306_Puts (gpsData.latDir, &Font_7x10, 1);
+		  SSD1306_GotoXY (34,27);
+		  SSD1306_Puts (gpsData.lon, &Font_7x10, 1);
+		  SSD1306_GotoXY (115,27);
+		  SSD1306_Puts (gpsData.lonDir, &Font_7x10, 1);
+		  SSD1306_GotoXY (35,37); //66
+		  SSD1306_Puts (gpsData.validStatus, &Font_7x10, 1);
+		  SSD1306_GotoXY (0,47);
+		  SSD1306_Puts (gpsData.utcTime, &Font_7x10, 1);
+		  SSD1306_GotoXY (70,47);
+		  SSD1306_Puts (gpsData.utcDate, &Font_7x10, 1);
+		  SSD1306_UpdateScreen(); //display
+
+		  /*free(gpsData.headType);
+		  free(gpsData.utcTime);
+		  free(gpsData.utcDate);
+		  free(gpsData.validStatus);
+		  free(gpsData.lat);
+		  free(gpsData.latDir);
+		  free(gpsData.lon);
+		  free(gpsData.lonDir);
+		  free(gpsData.speed);
+		  free(gpsData.course);*/
+		  //HAL_UART_Receive_IT( &huart1, &rxData, 1);
+	  }
+	  else if((rxIntCheck == 1) && (seqCheck != 6))
+	  {
+		  rxIntCheck = 0;
+		  HAL_UART_Receive_IT( &huart1, &rxData, 1);
+	  }
+	  else if((rxIntCheck == 1) && (seqCheck == 6))
+	  {
+		  if(rxInProgress == 0)
+		  {
+			  rxIntCheck = 75;
+			  HAL_UART_Receive_IT( &huart1, &gpsBuff[6], 74);
+			  rxInProgress = 1;
+		  }
+		  else
+		  {
+			  rxInProgress = 0;
+			  seqCheck = 0;
+			  nmea_parse(&gpsData, gpsBuff);
+			  //HAL_UART_Receive_IT( &huart1, &rxData, 1);
+			  updateFlag = 1;
+			  //Update Screen
+		  }
+	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -224,7 +284,7 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.Mode = UART_MODE_RX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   if (HAL_UART_Init(&huart1) != HAL_OK)
@@ -261,28 +321,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : sp_Pin sm_Pin */
-  GPIO_InitStruct.Pin = sp_Pin|sm_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : sw_Pin */
-  GPIO_InitStruct.Pin = sw_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(sw_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 }
 

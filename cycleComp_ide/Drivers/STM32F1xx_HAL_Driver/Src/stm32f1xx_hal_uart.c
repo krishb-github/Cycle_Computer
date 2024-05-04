@@ -3220,7 +3220,7 @@ HAL_StatusTypeDef UART_Start_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pDat
   /* Enable the UART Error Interrupt: (Frame error, noise error, overrun error) */
   __HAL_UART_ENABLE_IT(huart, UART_IT_ERR);
 
-  /* Enable the UART Data Register not empty Interrupt */
+  /* Enable the UART 1 Register not empty Interrupt */
   __HAL_UART_ENABLE_IT(huart, UART_IT_RXNE);
 
   return HAL_OK;
