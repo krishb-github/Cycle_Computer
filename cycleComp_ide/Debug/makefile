@@ -54,7 +54,8 @@ cycleComp_ide.list \
 
 
 # All Target
-all: main-build
+all:
+	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
 main-build: cycleComp_ide.elf secondary-outputs
@@ -80,6 +81,10 @@ clean:
 	-$(RM) cycleComp_ide.elf cycleComp_ide.list cycleComp_ide.map default.size.stdout
 	-@echo ' '
 
+post-build:
+	arm-none-eabi-objcopy -O ihex cycleComp_ide.elf cycleComp_ide.hex
+	-@echo ' '
+
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
 
 fail-specified-linker-script-missing:
@@ -89,6 +94,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified post-build
 
 -include ../makefile.targets

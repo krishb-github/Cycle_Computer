@@ -18,6 +18,7 @@
 #define LONG            5U
 #define LONGDIR         6U
 #define SPEED           7U
+#define COURSE			8U
 #define DATE            9U
 /*******************************************************************************
  * @brief GPS data structure for storing parsed data
