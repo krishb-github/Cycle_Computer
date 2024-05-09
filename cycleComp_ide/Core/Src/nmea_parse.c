@@ -4,6 +4,8 @@
 #include "nmea_parse.h"
 #include <stdio.h>
 
+extern uint32_t newSpeed;
+
 void nmea_mem_init(GPS *gps_data)
 {
 	gps_data->headType = malloc(10);
@@ -14,7 +16,7 @@ void nmea_mem_init(GPS *gps_data)
 	gps_data->lon = malloc(12);
 	gps_data->lonDir = malloc(2);
 	gps_data->speed = malloc(10);
-	gps_data->utcDate = malloc(8);
+	gps_data->utcDate = malloc(10);
 }
 
 void nmea_parse(GPS *gps_data, char *buffer)
@@ -36,10 +38,11 @@ void nmea_parse(GPS *gps_data, char *buffer)
 				break;
 
 			case UTC_TIME:
-				sprintf(gps_data->utcTime, "%.6s", paramVal);
+				sprintf(gps_data->utcTime, "%c%c:%c%c:%c%c", paramVal[0], paramVal[1], paramVal[2], paramVal[3], paramVal[4], paramVal[5]);
 				//strcpy(gps_data->utcTime, paramVal);
 				if(strcmp(paramVal, "V") == 0)
 				{
+					newSpeed = 0;
 					paramVal = "000000";
 					sprintf(gps_data->utcTime, "%.6s", paramVal);
 					paramVal = "INVALID";
@@ -64,6 +67,7 @@ void nmea_parse(GPS *gps_data, char *buffer)
 					sprintf(gps_data->validStatus, " LOCKED");
 				else if(strcmp(paramVal, "V") == 0)
 				{
+					newSpeed = 0;
 					paramVal = "INVALID";
 					strcpy(gps_data->lat, paramVal);
 					strcpy(gps_data->lon, paramVal);
@@ -78,7 +82,6 @@ void nmea_parse(GPS *gps_data, char *buffer)
 
 					breakCheck = 1;
 				}
-				//strcpy(gps_data->validStatus, paramVal);
 				i++;
 				break;
 
@@ -104,7 +107,8 @@ void nmea_parse(GPS *gps_data, char *buffer)
 
 			case SPEED:
 				speedkm = strtod(paramVal, &tmp);
-				speedkm *= 1.852;
+				speedkm = (double)speedkm * 1.852;
+				newSpeed = speedkm;
 				sprintf(paramVal, "%03d", (int)speedkm);
 				strcpy(gps_data->speed, paramVal);
 				i++;
@@ -121,7 +125,8 @@ void nmea_parse(GPS *gps_data, char *buffer)
 				break;
 
 			case DATE:
-				strcpy(gps_data->utcDate, paramVal);
+				sprintf(gps_data->utcDate, "%c%c-%c%c-%c%c", paramVal[0], paramVal[1], paramVal[2], paramVal[3], paramVal[4], paramVal[5]);
+				//strcpy(gps_data->utcDate, paramVal);
 				i++;
 				break;
 

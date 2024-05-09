@@ -73,6 +73,7 @@ uint8_t rxFlag = 0, updateFlag = 0, seqCheck = 0;
 uint8_t rxIntCheck=1;
 uint8_t rxInProgress=0;
 char rxData;
+uint32_t newSpeed = 0;
 /* USER CODE END 0 */
 
 /**
@@ -82,7 +83,9 @@ char rxData;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t displayCntr = 0;
+	float tripCnt = 0.0;
+	char tripStr[9] = "         ";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -109,21 +112,9 @@ int main(void)
 
   SSD1306_Init();  // initialise
 
-  /// lets print some string
-
-  SSD1306_GotoXY (0,0);
-  SSD1306_Puts ("SPD : ", &Font_11x18, 1);
-  SSD1306_GotoXY (0, 17);
-  SSD1306_Puts ("LAT: ", &Font_7x10, 1);
-  SSD1306_GotoXY (0, 27);
-  SSD1306_Puts ("LONG: ", &Font_7x10, 1);
-  SSD1306_GotoXY (0, 37);
-  SSD1306_Puts ("SAT : ", &Font_7x10, 1);
-  SSD1306_UpdateScreen(); //display
   /* USER CODE END 2 */
 
   nmea_mem_init(&gpsData);
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -131,36 +122,56 @@ int main(void)
     /* USER CODE END WHILE */
 	  if(updateFlag != 0)
 	  {
-		  updateFlag = 0;
-		  SSD1306_GotoXY (60,0);
-		  SSD1306_Puts (gpsData.speed, &Font_11x18, 1);
-		  SSD1306_GotoXY (34,17);
-		  SSD1306_Puts (gpsData.lat, &Font_7x10, 1);
-		  SSD1306_GotoXY (115,17);
-		  SSD1306_Puts (gpsData.latDir, &Font_7x10, 1);
-		  SSD1306_GotoXY (34,27);
-		  SSD1306_Puts (gpsData.lon, &Font_7x10, 1);
-		  SSD1306_GotoXY (115,27);
-		  SSD1306_Puts (gpsData.lonDir, &Font_7x10, 1);
-		  SSD1306_GotoXY (35,37); //66
-		  SSD1306_Puts (gpsData.validStatus, &Font_7x10, 1);
-		  SSD1306_GotoXY (0,47);
-		  SSD1306_Puts (gpsData.utcTime, &Font_7x10, 1);
-		  SSD1306_GotoXY (70,47);
-		  SSD1306_Puts (gpsData.utcDate, &Font_7x10, 1);
-		  SSD1306_UpdateScreen(); //display
-
-		  /*free(gpsData.headType);
-		  free(gpsData.utcTime);
-		  free(gpsData.utcDate);
-		  free(gpsData.validStatus);
-		  free(gpsData.lat);
-		  free(gpsData.latDir);
-		  free(gpsData.lon);
-		  free(gpsData.lonDir);
-		  free(gpsData.speed);
-		  free(gpsData.course);*/
-		  //HAL_UART_Receive_IT( &huart1, &rxData, 1);
+		  tripCnt = tripCnt + ((float)newSpeed/3.6);
+		  sprintf(tripStr,"%0.3f",(double)(tripCnt/1000.0));
+		  if(displayCntr < 10)
+		  {
+			  if(displayCntr == 0)
+				  SSD1306_Clear();
+			  displayCntr++;
+			  updateFlag = 0;
+			  SSD1306_GotoXY (40,25);
+			  SSD1306_Puts (gpsData.speed, &Font_16x26, 1);
+			  SSD1306_GotoXY (0,0);
+			  SSD1306_Puts (tripStr, &Font_11x18, 1);
+			  SSD1306_UpdateScreen();
+		  }
+		  else if(displayCntr < 15)
+		  {
+			  if(displayCntr == 10)
+			  	  SSD1306_Clear();
+			  displayCntr++;
+			  updateFlag = 0;
+			  SSD1306_GotoXY (0,0);
+			  SSD1306_Puts (gpsData.validStatus, &Font_11x18, 1);
+			  SSD1306_GotoXY (0,20);
+			  SSD1306_Puts (gpsData.lat, &Font_11x18, 1);
+			  SSD1306_GotoXY (110,20);
+			  SSD1306_Puts (gpsData.latDir, &Font_11x18, 1);
+			  SSD1306_GotoXY (0,38);
+			  SSD1306_Puts (gpsData.lon, &Font_11x18, 1);
+			  SSD1306_GotoXY (110,38);
+			  SSD1306_Puts (gpsData.lonDir, &Font_11x18, 1);
+			  SSD1306_UpdateScreen();
+		  }
+		  else if(displayCntr < 20)
+		  {
+			  if(displayCntr == 15)
+				  SSD1306_Clear();
+			  displayCntr++;
+			  updateFlag = 0;
+			  SSD1306_GotoXY (0,0);
+			  SSD1306_Puts ("UTC STAT", &Font_11x18, 1);
+			  SSD1306_GotoXY (0,20);
+			  SSD1306_Puts (gpsData.utcTime, &Font_11x18, 1);
+			  SSD1306_GotoXY (0,40);
+			  SSD1306_Puts (gpsData.utcDate, &Font_11x18, 1);
+			  SSD1306_UpdateScreen();
+			  if(displayCntr >= 20)
+			  {
+				  displayCntr = 0;
+			  }
+		  }
 	  }
 	  else if((rxIntCheck == 1) && (seqCheck != 6))
 	  {
@@ -180,9 +191,7 @@ int main(void)
 			  rxInProgress = 0;
 			  seqCheck = 0;
 			  nmea_parse(&gpsData, gpsBuff);
-			  //HAL_UART_Receive_IT( &huart1, &rxData, 1);
-			  updateFlag = 1;
-			  //Update Screen
+			  updateFlag = 1;  //Update Screen
 		  }
 	  }
 

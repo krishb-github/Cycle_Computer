@@ -1,2 +1,2 @@
-../Core/Src/nmea_parse.c:7:6:nmea_mem_init	16	static
-../Core/Src/nmea_parse.c:20:6:nmea_parse	56	static
+../Core/Src/nmea_parse.c:9:6:nmea_mem_init	16	static
+../Core/Src/nmea_parse.c:22:6:nmea_parse	88	static
