@@ -118,7 +118,8 @@ void nmea_parse(GPS *gps_data, char *buffer)
 				course = strtod(paramVal, &tmp);
 				if(course >= 010100)
 				{
-					strcpy(gps_data->utcDate, paramVal);
+					sprintf(gps_data->utcDate, "%c%c-%c%c-%c%c", paramVal[0], paramVal[1], paramVal[2], paramVal[3], paramVal[4], paramVal[5]);
+					//strcpy(gps_data->utcDate, paramVal);
 					breakCheck = 1;
 				}
 				i++;
